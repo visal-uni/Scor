@@ -1,20 +1,22 @@
 import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
 });
-
 export const sendCode = async (email, code) => {
   await transporter.sendMail({
-    from: `"Auth App" <${process.env.EMAIL_USER}>`,
+    from: `"Scor" <${process.env.EMAIL_USER}>`,
     to: email,
     subject: "Verify your identity",
     html: `
-    <div style="font-family: Arial, sans-serif; background:#f6f8fa; padding:40px 0;">
+    <div style="font-family: Arial, sans-serif; padding:40px 0;">
       <div style="max-width:520px;margin:auto;background:white;border:1px solid #e1e4e8;
                   border-radius:8px;padding:32px;text-align:center;">
 

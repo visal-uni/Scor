@@ -1,5 +1,5 @@
-import express from "express";
 import dotenv from "dotenv";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose"; 
@@ -18,7 +18,7 @@ app.use(cors({
     credentials: true
 }));
 
-app.use(routes);
+app.use("/auth", routes);
 
 mongoose.connect(MONGO_URL)
     .then(() => {
