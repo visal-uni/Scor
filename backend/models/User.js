@@ -1,24 +1,39 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
+    username: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 3
+    },
+
+    displayname: {
+        type: String,
+        required: true,
+        trim: true
+    },
+
     email: {
         type: String,
-        requierd: true,
+        required: true,
         unique: true,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     },
 
     password: {
         type: String,
-        required: true
+        required: true,
+        minlength: 6
     },
 
     role: {
-        typs: String,
+        type: String,
         enum: ["user", "admin"],
         default: "user"
     }
-});
+}, { timestamps: true });
 
 export default mongoose.model("User", userSchema);
