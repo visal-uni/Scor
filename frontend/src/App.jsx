@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Verify from "./pages/Verify";
+import Home from "./pages/home";
 
 export default function App(){
   return(
@@ -10,6 +11,7 @@ export default function App(){
       <Route path="/sign-up" element={<SignUp/>}/>
       <Route path="/login" element={<Login/>}/>
       <Route path="/verify" element={<Verify/>}/>
+      <Route path="/home" element={<Home/>}/>
     </Routes>
   );
 };

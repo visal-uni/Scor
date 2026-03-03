@@ -12,8 +12,12 @@ export const AuthProvider = ({children}) => {
         setUser(data);
     }
 
+    const verify = async (data) => {
+        await apiClient.post("/auth/verify-code", data);
+    }
+
     return(
-        <AuthContext.Provider value={{user, signup}}>
+        <AuthContext.Provider value={{user, signup, verify}}>
             {children}
         </AuthContext.Provider>
     );
