@@ -28,12 +28,10 @@ export default function SignUp(){
                 username: "",
                 password: ""
             });
+            navigate("/verify");
         }
         catch(err){
             console.error(err.response?.data);
-        }
-        finally{
-            navigate("/verify");
         }
     }
     return(
