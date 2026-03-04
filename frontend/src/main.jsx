@@ -7,12 +7,20 @@ import { AuthProvider} from './context/AuthContext.jsx';
 import './index.css'
 import App from './App.jsx'
 
-const queryClient = new QueryClient();
+//Create a Client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,  //Only retry failed request once 
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <GoogleOAuthProvider clientId='209331083218-b31oamsr0j5qls36u76fe6pfbi5innkf.apps.googleusercontent.com'>
+      <GoogleOAuthProvider clientId={import.meta.env.GOOGLE_OAUTH_CLIENTID}>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <App/>

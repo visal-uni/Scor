@@ -6,4 +6,14 @@ const apiClient = axios.create({
     timeout: 5000
 });
 
+apiClient.interceptors.response.use(
+    (response) => (response),
+    (error) => {
+        if(error.response?.status === 401){
+            console.error("Session expired. Please login in again");
+        }
+        return Promise.reject(error)
+    }
+)
+
 export default apiClient;
