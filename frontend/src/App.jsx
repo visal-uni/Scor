@@ -1,17 +1,19 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import SignUp from "./pages/SignUp";
-import Login from "./pages/Login";
-import Verify from "./pages/Verify";
-import Home from "./pages/home";
+import Signup from "./pages/form/Signup";
+import Login from "./pages/form/Login";
+import Verify from "./pages/form/Verify";
 
 export default function App(){
   return(
     <Routes>
+
+      { /*Public routes*/ }
       <Route path="/" element={<Navigate to="/sign-up"/>}/>
-      <Route path="/sign-up" element={<SignUp/>}/>
+      <Route path="/sign-up" element={<Signup/>}/>
       <Route path="/login" element={<Login/>}/>
       <Route path="/verify" element={<Verify/>}/>
-      <Route path="/home" element={<Home/>}/>
+
+       
     </Routes>
   );
 };
