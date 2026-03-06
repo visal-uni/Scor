@@ -16,10 +16,11 @@ export default function Signup(){
         password: "",
     });
 
-    const [localError, setLocalError] = useState(null);
+    // const [localError, setLocalError] = useState(null);
+    // const [formRequired, setFormRequired] = useState()
 
     const handleChange = (e) => {
-        setLocalError(null);
+        // setLocalError(null);
         reset(); 
         setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
     }
@@ -32,7 +33,7 @@ export default function Signup(){
                 username: form.username.trim(),
                 displayname: form.displayname.trim(),
                 email: form.email.trim(),
-                password: form.password.trim(),
+                password: form.password,
             });
             setForm({
                 username: "",
@@ -139,7 +140,7 @@ export default function Signup(){
                     </button>
                 </div>
                 <div className="mt-6">
-                    <Link to="/login" className="text-sm">Already have an account? <span className="underline">Login</span></Link>
+                    <Link to="/login" className="text-sm"><span className="text-gray-500">Already have an account?</span> <span className="underline">Login</span></Link>
                 </div>
             </form>
         </div>
