@@ -1,20 +1,48 @@
-import { useState } from "react"
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Login(){
+    const navigate = useNavigate();
+
+    const {
+        login,
+        loginStatus: {isPending, isSuccess, error, reset},
+    } = useAuth();
+
     const [dataForm, setFormData] = useState({
         email: "",
         password: "",
     });
 
     const handleChange = (e) => {
-       setFormData((prev) => ({...prev, [e.target.name]: e.target.value})); 
+        reset();
+        setFormData((prev) => ({...prev, [e.target.name]: e.target.value})); 
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        try{
+            await login({
+                email: dataForm.email,
+                password: dataForm.password
+            });
+
+            setFormData({
+                email: "",
+                password: ""
+            });
+        }
+        catch(err){
+            console.error(err?.respones?.data?.message ?? error);
+        }
     }
+
+    useEffect(() => {
+        if(isSuccess) return navigate("/home");
+    });
+
 
     return(
         <div
@@ -33,26 +61,28 @@ export default function Login(){
                 >
                     <label htmlFor="email" className="mt-6">Email</label>
                     <input 
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500"
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
                         type="email" 
                         name="email" 
                         placeholder="Email"
                         autoComplete="new-email"
                         onChange={handleChange}
+                        disabled={isPending}
                         required 
                     />
                 </div>
-                <div
+                <div 
                     className="flex flex-col"
                 >
                     <label htmlFor="password" className="mt-6">Password</label>
                     <input
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500" 
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700" 
                         type="password" 
                         name="password" 
                         placeholder="Password"
                         autoComplete="off"
                         onChange={handleChange}
+                        disabled={isPending}
                         required
                     />
                 </div>
@@ -61,7 +91,7 @@ export default function Login(){
                         type="submit"
                         className="mt-12 ring bg-black text-white w-full text-center p-3 rounded-lg cursor-pointer"
                     >
-                        Login
+                        {isPending ? "Loading..." : "Login"}
                     </button>
                 </div>
                 <div className="mt-6">

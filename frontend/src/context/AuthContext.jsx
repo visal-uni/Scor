@@ -66,6 +66,28 @@ export const AuthProvider = ({ children }) => {
         },
     });
 
+    //5. Request Mutation
+    const requestMutation = useMutation({
+        mutationFn: (email) => apiClient.post("/auth/request-code", email),
+        onSuccess: (res) => {
+            queryClient.setQueryData(["authUser"], res.data.user);
+        },
+        onError: (err) => {
+            console.error("[Auth] Request failed:", err?.response?.data?.message ?? err.message);
+        },
+    });
+
+    //6. Verify Mutation
+    const verifyMutation = useMutation({
+        mutationFn: (verifyData) => apiClient.post("/auth/verify-code", verifyData),
+        onSuccess: (res) => {
+            queryClient.setQueryData(["authUser"], res.data.user);
+        },
+        onError: (err) => {
+            console.error("[Auth] Verify failed:", err?.response?.message?.data ?? err.message);
+        }
+    });
+
     // Derived state — avoids pushing raw booleans to consumers
     const isAuthenticated = !!user;
     const isInitializing = isLoading && !isAuthError; // True only on very first load
@@ -81,6 +103,8 @@ export const AuthProvider = ({ children }) => {
         login: loginMutation.mutateAsync,
         logout: logoutMutation.mutate,
         register: registerMutation.mutateAsync,
+        verify: verifyMutation.mutateAsync,
+        request: requestMutation.mutateAsync,
 
         // Status objects
         loginStatus: {
@@ -98,6 +122,18 @@ export const AuthProvider = ({ children }) => {
             isSuccess: registerMutation.isSuccess,
             error: registerMutation.error?.response?.data?.message ?? null,
             reset: registerMutation.reset,
+        },
+        requestStatus: {
+            isPendingReq: requestMutation.isPending,
+            isSuccessReq: requestMutation.isSuccess,
+            errorReq: requestMutation.error?.response?.data?.message ?? null,
+            resetReq: registerMutation.reset,
+        },
+        verifyStatus: {
+            isPending: verifyMutation.isPending,
+            isSuccess: verifyMutation.isSuccess,
+            error: verifyMutation.isError,
+            reset: verifyMutation.reset,
         },
     };
 

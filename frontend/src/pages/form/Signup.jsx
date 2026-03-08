@@ -1,13 +1,9 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function Signup(){
     const navigate = useNavigate();
-    const {
-        register,
-        registerStatus: {isPending, isSuccess, error, reset},
-    } = useAuth();
 
     const [form, setForm] = useState({
         username: "",
@@ -16,17 +12,61 @@ export default function Signup(){
         password: "",
     });
 
-    // const [localError, setLocalError] = useState(null);
-    // const [formRequired, setFormRequired] = useState()
+    const refs = useRef({
+        username: null,
+        displayname: null,
+        email: null,
+        password: null,
+    });
+
+    const validateForm = () => {
+
+        let isValid = true;
+
+        const setError = (key) => {
+            refs.current[key].style.border = "1px solid #ff4d4d";
+            refs.current[key].style.backgroundColor = "#fff5f5";
+            isValid = false;
+        }
+
+        if(form.username.trim().length < 5){
+            setError("username");
+        }
+
+        if(form.displayname.trim().length < 2){
+            setError("displayname");
+        }
+
+        const emailPattern = /^[^\s@]+@gmail\.com$/;
+        if(!emailPattern.test(form.email)){
+            setError("email");
+        }
+
+        if(form.password.length < 6){
+            setError("password");
+        }
+
+        return isValid;
+    }
+    
+    const {
+        register,
+        registerStatus: {isPending, isSuccess, error, reset},
+        request,
+        requestStatus: {isPendingReq, isSuccessReq, errorReq, resetReq},
+    } = useAuth();
+
 
     const handleChange = (e) => {
-        // setLocalError(null);
-        reset(); 
+        reset();
+        resetReq(); 
         setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
     }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if(!validateForm()) return;
 
         try{
             await register({
@@ -35,21 +75,19 @@ export default function Signup(){
                 email: form.email.trim(),
                 password: form.password,
             });
-            setForm({
-                username: "",
-                displayname: "",
-                email: "",
-                password: "",
-            });
+            
+            await request({email: form.email.trim()});
         }
         catch(err){
-            console.error(err?.respones?.data?.message ?? error);
+            console.error(err?.respones?.data?.message ?? error ?? errorReq);
         }
     }
 
-    if(isSuccess){
-        return navigate("/verify", {state: form}); 
-    }
+    useEffect(() => {
+        if(isSuccess && isSuccessReq){
+            return navigate("/verify", {state: form, replace: true}); 
+        } 
+    }, [isSuccess, navigate, form, isSuccessReq]);
 
     return(
         <div
@@ -57,7 +95,7 @@ export default function Signup(){
         >
             <form
                 onSubmit={handleSubmit}
-                className="w-md border border-gray-300 p-10 rounded-lg shadow shadow-gray-200" 
+                className="w-md p-10 rounded-lg border border-gray-200 shadow shadow-gray-300" 
             >
                 <div>
                     <h1 className="text-2xl font-semibold text-center">Create an Account</h1>
@@ -67,15 +105,16 @@ export default function Signup(){
                 >
                     <label htmlFor="username" className="mt-6   ">Username</label>
                     <input
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500"
+                        ref={(el) => (refs.current.username = el)}
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
                         type="text" 
                         name="username" 
                         id="username"
                         value={form.username}
                         placeholder="Uername"
                         onChange={handleChange}
-                        disabled={isPending}
-                        autoComplete="new-name"
+                        disabled={isPending || isPendingReq}
+                        autoComplete="new-name"                
                         required
                     />
                 </div>
@@ -84,14 +123,15 @@ export default function Signup(){
                 >
                     <label htmlFor="displayname" className="mt-6">Display Name</label>
                     <input 
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500"
+                        ref={(el) => (refs.current.displayname = el)}
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
                         type="text" 
                         name="displayname" 
                         id="displayname"
                         value={form.displayname}
                         placeholder="Displayname"
                         onChange={handleChange}
-                        disabled={isPending}
+                        disabled={isPending || isPending}
                         autoComplete="new-name"
                         required
                     />
@@ -101,31 +141,32 @@ export default function Signup(){
                 >
                     <label htmlFor="email" className="mt-6">Email</label>
                     <input 
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500"
+                        ref={(el) => (refs.current.email = el)}
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
                         type="email" 
                         name="email" 
                         id="email"
                         value={form.email}
                         placeholder="Email"
                         onChange={handleChange}
-                        disabled={isPending}
+                        disabled={isPending || isPendingReq}
                         autoComplete="new-email"
-                        required
                     />
                 </div>
                 <div
                     className="flex flex-col"
                 >
                     <label htmlFor="password" className="mt-6">Password</label>
-                    <input 
-                        className="p-2 mt-1.5 ring ring-gray-300 rounded-lg shadow shadow-gray-200 outline-none focus:ring-gray-500"
+                    <input
+                        ref={(el) => refs.current.password = el}
+                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
                         type="password" 
                         name="password" 
                         id="password"
                         value={form.password}
                         placeholder="Password"
                         onChange={handleChange}
-                        disabled={isPending}
+                        disabled={isPending || isPendingReq}
                         autoComplete="off"
                         required
                     />
@@ -136,7 +177,7 @@ export default function Signup(){
                         disabled={isPending}
                         className="mt-12 ring bg-black text-white w-full text-center p-3 rounded-lg cursor-pointer"
                     >
-                        {isPending ? "Loading..." : "Create Account"}
+                        {isPending || isPendingReq ? "Loading..." : "Create Account"}
                     </button>
                 </div>
                 <div className="mt-6">

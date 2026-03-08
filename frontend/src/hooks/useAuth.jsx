@@ -9,6 +9,8 @@ export const AuthContext = createContext({
     login: async () => {},
     logout: () => {},
     register: async () => {},
+    verify: async () => {},
+    request: async () => {},
 
     loginStatus: {
         isPending: false,
@@ -28,6 +30,20 @@ export const AuthContext = createContext({
         error: null,
         reset: () => {},
     },
+
+    requestStatus: {
+        isPendingReq: false,
+        isSuccessReq: false,
+        errorReq: null,
+        resetReq: () => {},
+    },
+
+    verifyStatus: {
+        isPending: false,
+        isSuccess: false,
+        error: null,
+        reset: () => {},
+    }
 });
 
 export const useAuth = () => {

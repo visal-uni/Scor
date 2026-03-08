@@ -1,19 +1,36 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useAuth } from "../../hooks/useAuth";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function Verify(){
+    const navigate = useNavigate();
+    const location = useLocation();
+    const {email} = location.state || {};
+
+    const {
+        verify,
+        verifyStatus: {isPending, isSuccess, error, reset},
+    } = useAuth();
 
     const [otp, setOtp] = useState(new Array(6).fill(""));
     const inputRef = useRef([]);
 
     const handleChange = (e, index) => {
         if(isNaN(e.target.value)) return false;
-
+        
+        reset();
+        
         const newOtp = [...otp];
         newOtp[index] = e.target.value;
         setOtp(newOtp);
         
         if(e.target.value !== "" && index < 5){
             inputRef.current[index + 1].focus();
+        }
+
+        const code = newOtp.join("");
+        if(code.length === 6){
+            handleSubmit(code);
         }
     }
 
@@ -30,6 +47,24 @@ export default function Verify(){
             inputRef.current[index - 1].focus();
         }
     }
+
+    const handleSubmit = async (code) => {
+        try{
+            await verify({
+                email: email,
+                code: code
+            });
+            setOtp(new Array(6).fill(""));
+        }
+        catch(err){
+            console.error(err?.response?.message?.data ?? error);
+        }
+    }
+
+    useEffect(() => {
+        if(isSuccess) return navigate("/home", {replace: true});
+    }, [isSuccess, navigate]);
+
 
     return(
         <div
@@ -54,7 +89,8 @@ export default function Verify(){
                         onChange={(e) => handleChange(e, index)}
                         onPaste={handlePaste}
                         onKeyDown={(e) => handleKeyDown(e, index)} 
-                        autoComplete="new-off"
+                        autoComplete="one-time-code"
+                        disabled={isPending}
                     />
                 ))}
                 <div>
