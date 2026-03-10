@@ -1,4 +1,6 @@
 import User from "../models/User.js";
+import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
+import { setAuthCookies } from "../utils/cookie.js";
 import bcrypt from "bcrypt";
 
 export const register = async (req, res) => {
@@ -27,11 +29,21 @@ export const register = async (req, res) => {
             password: hashPassword
         });
 
-        res.status(201).json({
-            message: "Sing up successful",
-            userId: user._id,
-            displayname: user.displayname,
-            email: user.email
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        user.refreshToken = await bcrypt.hash(refreshToken, 12);
+        await user.save();
+
+        setAuthCookies(res, accessToken, refreshToken);
+
+        res.status(200).json({
+            user:{
+                id: user._id,
+                name: user.username,
+                displayname: user.displayname,
+                email: user.email
+            }
         });
     }
     catch(err){
@@ -46,21 +58,34 @@ export const login = async (req, res) => {
         if (!email || !password)
             return res.status(400).json({ message: "[Auth] Email and password is required" });
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).select("+password +refreshToken");
 
         if (!user)
-            return res.status(404).json({ message: "[Auth] User not found" });
+            return res.status(404).json({ message: "[Auth] Invalid email or password" });
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch)
             return res.status(401).json({ message: "Wrong password" });
 
-        res.json({
-            message: "Login successful",
-            userId: user._id
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        user.refreshToken = await bcrypt.hash(refreshToken, 12);
+        await user.save();
+
+        setAuthCookies(res, accessToken, refreshToken);
+
+        res.status(200).json({
+            user: {
+                id: user._id,
+                username: user.username,
+                displayname: user.displayname,
+                email: user.email
+            }
         });
     } catch (err) {
         res.status(500).json({ message: "[Auth] Failed login" });
     }
 };
+

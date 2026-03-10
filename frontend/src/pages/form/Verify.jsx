@@ -15,6 +15,13 @@ export default function Verify(){
     const [otp, setOtp] = useState(new Array(6).fill(""));
     const inputRef = useRef([]);
 
+    const combinedCode = (newOtp) => {
+        const code = newOtp.join("");
+        if(code.length === 6){
+            handleSubmit(code);
+        }
+    };
+
     const handleChange = (e, index) => {
         if(isNaN(e.target.value)) return false;
         
@@ -28,11 +35,8 @@ export default function Verify(){
             inputRef.current[index + 1].focus();
         }
 
-        const code = newOtp.join("");
-        if(code.length === 6){
-            handleSubmit(code);
-        }
-    }
+        combinedCode(newOtp);
+    };
 
     const handlePaste = (e) => {
         const data = e.clipboardData.getData("text").slice(0, 6).split("");
@@ -40,13 +44,14 @@ export default function Verify(){
             setOtp(data);
             inputRef.current[5].focus();
         }
-    }
+        combinedCode(data);
+    };
 
     const handleKeyDown = (e, index) => {
         if(e.key === "Backspace" && !otp[index] && index > 0){
             inputRef.current[index - 1].focus();
         }
-    }
+    };
 
     const handleSubmit = async (code) => {
         try{
@@ -59,10 +64,10 @@ export default function Verify(){
         catch(err){
             console.error(err?.response?.message?.data ?? error);
         }
-    }
+    };
 
     useEffect(() => {
-        if(isSuccess) return navigate("/home", {replace: true});
+        if(isSuccess) return navigate("/home", {replace: false});
     }, [isSuccess, navigate]);
 
 

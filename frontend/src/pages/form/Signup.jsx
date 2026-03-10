@@ -85,7 +85,7 @@ export default function Signup(){
 
     useEffect(() => {
         if(isSuccess && isSuccessReq){
-            return navigate("/verify", {state: form, replace: true}); 
+            return navigate("/verify", {state: form, replace: false}); 
         } 
     }, [isSuccess, navigate, form, isSuccessReq]);
 

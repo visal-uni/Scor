@@ -40,7 +40,7 @@ export default function Login(){
     }
 
     useEffect(() => {
-        if(isSuccess) return navigate("/home");
+        if(isSuccess) return navigate("/home", {replace: false});
     });
 
 
