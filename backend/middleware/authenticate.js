@@ -1,16 +1,16 @@
-import { verifyAccessToken } from "../utils/token";
-import { ACCESS_COOKIE } from "../utils/cookie";
+import { verifyAccessToken } from "../utils/token.js";
+import { ACCESS_COOKIE } from "../utils/cookie.js";
 
 export const authenticate = (req, res, next) => {
-    const token = req.token?.[ACCESS_COOKIE];
+    const token = req.cookies?.[ACCESS_COOKIE];
 
     if(!token){
         return res.status(401).json({message: "No access token."});
     }
 
     try{
-        const playload = verifyAccessToken(token);
-        req.userId = playload.sub;
+        const payload = verifyAccessToken(token);
+        req.userId = payload.sub;
         next();
     }
     catch(err){

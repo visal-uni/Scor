@@ -1,6 +1,6 @@
 import User from "../models/User.js";
-import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
-import { setAuthCookies } from "../utils/cookie.js";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/token.js";
+import { setAuthCookies, clearAuthCookies, REFRESH_COOKIE } from "../utils/cookie.js";
 import bcrypt from "bcrypt";
 
 export const register = async (req, res) => {
@@ -89,3 +89,73 @@ export const login = async (req, res) => {
     }
 };
 
+export const refreshToken = async (req, res) => {
+    try{
+        const token = req.cookies?.[REFRESH_COOKIE];
+
+        if(!token)
+            return res.status(401).json({message: "No access token"});
+
+        let payload;
+
+        try{
+            payload = verifyRefreshToken(token);
+        }
+        catch{
+            return res.status(401).json({message: "Invalid or expired refresh token."});
+        }
+
+        const user = await User.findById(payload.sub).select("+refreshToken");
+        if(!user)
+            return res.status(401).json({message: "User not found."});
+
+        const tokenMatch = bcrypt.compare(token, user.refreshToken);
+        if(!tokenMatch){
+            clearAuthCookies(res);
+            user.refreshToken = null;
+            await user.save();
+            return res.status(401).json({message: "Token reuse detected. Please log in again."});
+        }
+
+        const newAccessToken = generateAccessToken(user._id);
+        const newRefreshToken = generateRefreshToken(user._id);
+
+        user.refreshToken = await bcrypt.hash(newRefreshToken, 12);
+        await user.save();
+
+        setAuthCookies(res, newAccessToken, newRefreshToken);
+
+        return res.status(200).json({ ok: true });
+    }
+    catch(err){
+        res.status(500).json({message: "[Auth] Failed refresh token"});
+    }
+}
+
+export const logout = async (req, res) => {
+    const token = req.cookies?.[REFRESH_COOKIE];
+
+    if(token){
+        const user = await User.findById(req.userId).select("+refreshToken");
+        if(user){
+            user.refreshToken = null;
+            await user.save();
+        }
+    }
+
+    clearAuthCookies(res);
+    return res.status(200).json({ ok: true });
+}
+
+export const me = async (req, res) => {
+    try{
+        const user = await User.findById(req.userId).select("-password -refreshToken");
+        if(!user)
+            return res.status(404).json({message: "User not found"});
+        
+        return res.status(200).json(user);
+    }
+    catch(err){
+        res.status(500).json({message: "Failed get user"});
+    }
+}
