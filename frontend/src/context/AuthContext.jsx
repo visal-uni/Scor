@@ -15,8 +15,14 @@ export const AuthProvider = ({ children }) => {
         queryKey: ["authUser"],
         queryFn: async () => {
             try {
-                const { data } = await apiClient.get("/auth/me");
-                return data ?? null;
+                const res = await apiClient.get("/auth/me");
+                const { status, data } = res;
+                // If the server returns 200 or 304, we treat the user
+                // as authenticated even if the body is empty (304 case).
+                if (status === 200 || status === 304) {
+                    return data ?? { _placeholder: true };
+                }
+                return null;
             } catch (err) {
                 // Treat 401 as "not logged in", not a real error
                 if (err?.response?.status === 401) return null;
@@ -66,23 +72,17 @@ export const AuthProvider = ({ children }) => {
         },
     });
 
-    //5. Request Mutation
+    //5. Request Mutation - send verification code to email
     const requestMutation = useMutation({
         mutationFn: (email) => apiClient.post("/auth/request-code", email),
-        onSuccess: (res) => {
-            queryClient.setQueryData(["authUser"], res.data.user);
-        },
         onError: (err) => {
             console.error("[Auth] Request failed:", err?.response?.data?.message ?? err.message);
         },
     });
 
-    //6. Verify Mutation
+    //6. Verify Mutation - only checks the code
     const verifyMutation = useMutation({
         mutationFn: (verifyData) => apiClient.post("/auth/verify-code", verifyData),
-        onSuccess: (res) => {
-            queryClient.setQueryData(["authUser"], res.data.user);
-        },
         onError: (err) => {
             console.error("[Auth] Verify failed:", err?.response?.message?.data ?? err.message);
         }
@@ -124,10 +124,10 @@ export const AuthProvider = ({ children }) => {
             reset: registerMutation.reset,
         },
         requestStatus: {
-            isPendingReq: requestMutation.isPending,
-            isSuccessReq: requestMutation.isSuccess,
-            errorReq: requestMutation.error?.response?.data?.message ?? null,
-            resetReq: registerMutation.reset,
+            isPending: requestMutation.isPending,
+            isSuccess: requestMutation.isSuccess,
+            error: requestMutation.error?.response?.data?.message ?? null,
+            reset: registerMutation.reset,
         },
         verifyStatus: {
             isPending: verifyMutation.isPending,

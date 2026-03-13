@@ -50,15 +50,12 @@ export default function Signup(){
     }
     
     const {
-        register,
-        registerStatus: {isPending, isSuccess, error, reset},
         request,
         requestStatus: {isPendingReq, isSuccessReq, errorReq, resetReq},
     } = useAuth();
 
 
     const handleChange = (e) => {
-        reset();
         resetReq(); 
         setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
     }
@@ -69,33 +66,26 @@ export default function Signup(){
         if(!validateForm()) return;
 
         try{
-            await register({
-                username: form.username.trim(),
-                displayname: form.displayname.trim(),
-                email: form.email.trim(),
-                password: form.password,
-            });
-            
             await request({email: form.email.trim()});
         }
         catch(err){
-            console.error(err?.respones?.data?.message ?? error ?? errorReq);
+            console.error(err?.respones?.data?.message ?? errorReq);
         }
     }
 
     useEffect(() => {
-        if(isSuccess && isSuccessReq){
+        if(isSuccessReq){
             return navigate("/verify", {state: form, replace: false}); 
         } 
-    }, [isSuccess, navigate, form, isSuccessReq]);
+    }, [isSuccessReq, navigate, form]);
 
     return(
         <div
-            className="flex items-center justify-center min-h-screen text-base"
+            className="flex items-center justify-center min-h-screen text-base px-4 sm:px-6"
         >
             <form
                 onSubmit={handleSubmit}
-                className="w-md p-10 rounded-lg border border-gray-200 shadow shadow-gray-300" 
+                className="w-full max-w-md px-6 py-8 sm:px-8 sm:py-10 rounded-lg border border-gray-200 shadow shadow-gray-300 bg-white" 
             >
                 <div>
                     <h1 className="text-2xl font-semibold text-center">Create an Account</h1>
@@ -113,7 +103,7 @@ export default function Signup(){
                         value={form.username}
                         placeholder="Uername"
                         onChange={handleChange}
-                        disabled={isPending || isPendingReq}
+                        disabled={isPendingReq}
                         autoComplete="new-name"                
                         required
                     />
@@ -131,7 +121,7 @@ export default function Signup(){
                         value={form.displayname}
                         placeholder="Displayname"
                         onChange={handleChange}
-                        disabled={isPending || isPending}
+                        disabled={isPendingReq}
                         autoComplete="new-name"
                         required
                     />
@@ -149,7 +139,7 @@ export default function Signup(){
                         value={form.email}
                         placeholder="Email"
                         onChange={handleChange}
-                        disabled={isPending || isPendingReq}
+                        disabled={isPendingReq}
                         autoComplete="new-email"
                     />
                 </div>
@@ -166,7 +156,7 @@ export default function Signup(){
                         value={form.password}
                         placeholder="Password"
                         onChange={handleChange}
-                        disabled={isPending || isPendingReq}
+                        disabled={isPendingReq}
                         autoComplete="off"
                         required
                     />
@@ -174,10 +164,10 @@ export default function Signup(){
                 <div>
                     <button 
                         type="submit"
-                        disabled={isPending}
+                        disabled={isPendingReq}
                         className="mt-12 ring bg-black text-white w-full text-center p-3 rounded-lg cursor-pointer"
                     >
-                        {isPending || isPendingReq ? "Loading..." : "Create Account"}
+                        {isPendingReq ? "Sending Code..." : "Create Account"}
                     </button>
                 </div>
                 <div className="mt-6">

@@ -46,11 +46,11 @@ export default function Login(){
 
     return(
         <div
-            className="flex min-h-screen items-center justify-center text-base"
+            className="flex min-h-screen items-center justify-center text-base px-4 sm:px-6"
         >
             <form
                 onSubmit={handleSubmit}
-                className="w-md border border-gray-300 p-10 rounded-lg shadow shadow-gray-200"
+                className="w-full max-w-md border border-gray-300 px-6 py-8 sm:px-8 sm:py-10 rounded-lg shadow shadow-gray-200 bg-white"
             >
                 <div>
                     <h1 className="text-2xl font-semibold text-center">Welcome back!</h1>

@@ -21,12 +21,7 @@ export const verifyCode = (req, res) => {
   const valid = verifyOTP(email, code);
   if (!valid) return res.status(400).json({ msg: "Invalid or expired code" });
 
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
-  });
-
-  res.json({
-    msg: "Login success",
-    token,
-  });
+  // Only confirm that the code is valid.
+  // The actual account creation & login are handled in userController.register.
+  res.json({ msg: "Code verified" });
 };
