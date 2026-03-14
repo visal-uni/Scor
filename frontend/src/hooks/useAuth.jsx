@@ -3,7 +3,7 @@ import { createContext, useContext } from "react";
 export const AuthContext = createContext({
     user: null,
     isAuthenticated:false,
-    isInitializing: true,
+    isInitializing:true,
     isLoading: false,
 
     login: async () => {},

@@ -87,18 +87,26 @@ export const login = async (req, res) => {
 }
 export const refreshToken = async (req, res) => {
     try{
+        // Cookie (browser) or body (e.g. Postman: { "refreshToken": "..." })
         const token = req.cookies?.[REFRESH_COOKIE];
         if(!token)
-            return res.status(401).json({message: "No access token"});
-        
-        const payload = verifyRefreshToken(token);
+            return res.status(401).json({message: "No refresh token"});
+
+        let payload;
+
+        try{
+            payload = verifyRefreshToken(token);
+        }
+        catch{
+            return res.status(401).json({message: "Invalid or expired refresh token."});
+        }
 
         const user = await User.findById(payload.sub).select("+refreshToken");
         if(!user)
-            return res.status(404).json({message: "User not found"});
+            return res.status(404).json({message: "User not found."});
 
-        const isMatchRefreshToken = bcrypt.compareSync(token, user.refreshToken);
-        if(!isMatchRefreshToken){
+        const tokenMatch = await bcrypt.compare(token, user.refreshToken);
+        if(!tokenMatch){
             clearAuthCookies(res);
             user.refreshToken = null;
             user.save();
@@ -111,6 +119,7 @@ export const refreshToken = async (req, res) => {
         user.refreshToken = await bcrypt.hash(newRefreshToken, 12);
         await user.save();
 
+        clearAuthCookies(res);
         setAuthCookies(res, newAccessToken, newRefreshToken);
 
         res.status(200).json({

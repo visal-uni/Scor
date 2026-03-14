@@ -51,12 +51,12 @@ export default function Signup(){
     
     const {
         request,
-        requestStatus: {isPendingReq, isSuccessReq, errorReq, resetReq},
+        requestStatus: {isPending, isSuccess, error, reset},
     } = useAuth();
 
 
     const handleChange = (e) => {
-        resetReq(); 
+        reset(); 
         setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
     }
 
@@ -69,15 +69,15 @@ export default function Signup(){
             await request({email: form.email.trim()});
         }
         catch(err){
-            console.error(err?.respones?.data?.message ?? errorReq);
+            console.error(err?.respones?.data?.message ?? error);
         }
     }
 
     useEffect(() => {
-        if(isSuccessReq){
+        if(isSuccess){
             return navigate("/verify", {state: form, replace: false}); 
         } 
-    }, [isSuccessReq, navigate, form]);
+    }, [isSuccess, navigate, form]);
 
     return(
         <div
@@ -103,7 +103,7 @@ export default function Signup(){
                         value={form.username}
                         placeholder="Uername"
                         onChange={handleChange}
-                        disabled={isPendingReq}
+                        disabled={isPending}
                         autoComplete="new-name"                
                         required
                     />
@@ -121,7 +121,7 @@ export default function Signup(){
                         value={form.displayname}
                         placeholder="Displayname"
                         onChange={handleChange}
-                        disabled={isPendingReq}
+                        disabled={isPending}
                         autoComplete="new-name"
                         required
                     />
@@ -139,7 +139,7 @@ export default function Signup(){
                         value={form.email}
                         placeholder="Email"
                         onChange={handleChange}
-                        disabled={isPendingReq}
+                        disabled={isPending}
                         autoComplete="new-email"
                     />
                 </div>
@@ -156,7 +156,7 @@ export default function Signup(){
                         value={form.password}
                         placeholder="Password"
                         onChange={handleChange}
-                        disabled={isPendingReq}
+                        disabled={isPending}
                         autoComplete="off"
                         required
                     />
@@ -164,10 +164,10 @@ export default function Signup(){
                 <div>
                     <button 
                         type="submit"
-                        disabled={isPendingReq}
+                        disabled={isPending}
                         className="mt-12 ring bg-black text-white w-full text-center p-3 rounded-lg cursor-pointer"
                     >
-                        {isPendingReq ? "Sending Code..." : "Create Account"}
+                        {isPending ? "Sending Code..." : "Create Account"}
                     </button>
                 </div>
                 <div className="mt-6">

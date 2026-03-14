@@ -23,10 +23,11 @@ export const setAuthCookies = (res, accessToken, refreshToken) => {
     res.cookie(REFRESH_COOKIE, refreshToken, {
         ...base,
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: "/auth/refresh",
     });
 };
 
 export const clearAuthCookies = (res) => {
     res.clearCookie(ACCESS_COOKIE, { ...base });
-    res.clearCookie(REFRESH_COOKIE, { ...base });
+    res.clearCookie(REFRESH_COOKIE, { ...base, path: "/auth/refresh" });
 };
