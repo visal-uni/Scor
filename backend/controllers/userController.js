@@ -91,10 +91,11 @@ export const login = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
     try{
+        // Cookie (browser) or body (e.g. Postman: { "refreshToken": "..." })
         const token = req.cookies?.[REFRESH_COOKIE];
 
         if(!token)
-            return res.status(401).json({message: "No access token"});
+            return res.status(401).json({message: "No refresh token"});
 
         let payload;
 
@@ -107,9 +108,9 @@ export const refreshToken = async (req, res) => {
 
         const user = await User.findById(payload.sub).select("+refreshToken");
         if(!user)
-            return res.status(401).json({message: "User not found."});
+            return res.status(404).json({message: "User not found."});
 
-        const tokenMatch = bcrypt.compare(token, user.refreshToken);
+        const tokenMatch = await bcrypt.compare(token, user.refreshToken);
         if(!tokenMatch){
             clearAuthCookies(res);
             user.refreshToken = null;
@@ -123,6 +124,7 @@ export const refreshToken = async (req, res) => {
         user.refreshToken = await bcrypt.hash(newRefreshToken, 12);
         await user.save();
 
+        clearAuthCookies(res);
         setAuthCookies(res, newAccessToken, newRefreshToken);
 
         return res.status(200).json({ ok: true });
