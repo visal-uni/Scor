@@ -6,6 +6,8 @@ export const AuthProvider = ({ children }) => {
     const queryClient = useQueryClient();
 
     // 1. Get current user (Auto-runs on page load)
+    const wasLoggedIn = localStorage.getItem("isLoggedIn", "true") === "true";
+
     const {
         data: user,
         isLoading,
@@ -15,24 +17,19 @@ export const AuthProvider = ({ children }) => {
         queryKey: ["authUser"],
         queryFn: async () => {
             try {
-                const res = await apiClient.get("/auth/me");
-                const { status, data } = res;
-                // If the server returns 200 or 304, we treat the user
-                // as authenticated even if the body is empty (304 case).
-                if (status === 200 || status === 304) {
-                    return data ?? { _placeholder: true };
-                }
-                return null;
+                const {data} = await apiClient.get("/auth/me");
+                localStorage.setItem("isLoggedIn", "true");
+                return data ?? null;
             } catch (err) {
                 // Treat 401 as "not logged in", not a real error
                 if (err?.response?.status === 401) return null;
+                localStorage.removeItem("isLoggedIn");
                 throw err;
             }
         },
         retry: false,
         staleTime: 1000 * 60 * 5,
         refetchOnWindowFocus: false, // Avoid surprise refetches
-        placeholderData: null,       // Avoid undefined flicker on first load
     });
 
     // 2. Login Mutation
@@ -50,11 +47,13 @@ export const AuthProvider = ({ children }) => {
     const logoutMutation = useMutation({
         mutationFn: () => apiClient.post("/auth/logout"),
         onSuccess: () => {
+            localStorage.removeItem("isLoggedIn");
             queryClient.setQueryData(["authUser"], null);
             queryClient.clear();
         },
         onError: (err) => {
             // Still clear local state even if server logout fails
+            localStorage.removeItem("isLoggedIn");
             console.error("[Auth] Logout failed:", err?.response?.data?.message ?? err.message);
             queryClient.setQueryData(["authUser"], null);
             queryClient.clear();
@@ -90,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
     // Derived state — avoids pushing raw booleans to consumers
     const isAuthenticated = !!user;
-    const isInitializing = isLoading && !isAuthError; // True only on very first load
+    const isInitializing = wasLoggedIn ? isLoading : false; // True only on very first load
 
     const value = {
         // User state
