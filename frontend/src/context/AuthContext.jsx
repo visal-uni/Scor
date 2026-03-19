@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
         data: user,
         isLoading,
         isFetching,
-        isError: isAuthError,
     } = useQuery({
         queryKey: ["authUser"],
         queryFn: async () => {
