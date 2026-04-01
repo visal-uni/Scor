@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }) => {
             isPending: requestMutation.isPending,
             isSuccess: requestMutation.isSuccess,
             error: requestMutation.error?.response?.data?.message ?? null,
-            reset: registerMutation.reset,
+            reset: requestMutation.reset,
         },
         verifyStatus: {
             isPending: verifyMutation.isPending,
