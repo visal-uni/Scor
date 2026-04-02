@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 import { sendCode } from "../utils/mailer.js";
 import { saveOTP, verifyOTP } from "../utils/otpStore.js";
 
@@ -6,6 +7,14 @@ export const requestCode = async (req, res) => {
   const { email } = req.body;
 
   if (!email) return res.status(400).json({ msg: "Email required" });
+
+  const user = await User.findOne({email});
+
+  if(user){
+    return res.status(409).json({
+      messsage: "Email already token"
+    });
+  }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
 

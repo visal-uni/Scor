@@ -32,10 +32,10 @@ export const AuthContext = createContext({
     },
 
     requestStatus: {
-        isPendingReq: false,
-        isSuccessReq: false,
-        errorReq: null,
-        resetReq: () => {},
+        isPending: false,
+        isSuccess: false,
+        error: null,
+        reset: () => {},
     },
 
     verifyStatus: {

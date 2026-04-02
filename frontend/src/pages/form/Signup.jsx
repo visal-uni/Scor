@@ -19,34 +19,30 @@ export default function Signup(){
         password: null,
     });
 
+    const [fieldErrors, setFieldErrors] = useState({});
+
     const validateForm = () => {
+        const nextErrors = {};
 
-        let isValid = true;
-
-        const setError = (key) => {
-            refs.current[key].style.border = "1px solid #ff4d4d";
-            refs.current[key].style.backgroundColor = "#fff5f5";
-            isValid = false;
+        if (form.username.trim().length < 5) {
+            nextErrors.username = "Username must be at least 5 characters.";
         }
 
-        if(form.username.trim().length < 5){
-            setError("username");
-        }
-
-        if(form.displayname.trim().length < 2){
-            setError("displayname");
+        if (form.displayname.trim().length < 2) {
+            nextErrors.displayname = "Display name must be at least 2 characters.";
         }
 
         const emailPattern = /^[^\s@]+@gmail\.com$/;
-        if(!emailPattern.test(form.email)){
-            setError("email");
+        if (!emailPattern.test(form.email.trim())) {
+            nextErrors.email = "Email must be a valid @gmail.com address.";
         }
 
-        if(form.password.length < 6){
-            setError("password");
+        if (form.password.length < 6) {
+            nextErrors.password = "Password must be at least 6 characters.";
         }
 
-        return isValid;
+        setFieldErrors(nextErrors);
+        return Object.keys(nextErrors).length === 0;
     }
     
     const {
@@ -56,21 +52,21 @@ export default function Signup(){
 
 
     const handleChange = (e) => {
-        reset(); 
-        setForm((prev) => ({...prev, [e.target.name]: e.target.value}));
+        const { name, value } = e.target;
+        reset();
+        setFieldErrors((prev) => {
+            if (!prev[name]) return prev;
+            const copy = { ...prev };
+            delete copy[name];
+            return copy;
+        });
+        setForm((prev) => ({ ...prev, [name]: value }));
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-
         if(!validateForm()) return;
-
-        try{
-            await request({email: form.email.trim()});
-        }
-        catch(err){
-            console.error(err?.respones?.data?.message ?? error);
-        }
+        request({email: form.email.trim()});
     }
 
     useEffect(() => {
@@ -96,7 +92,9 @@ export default function Signup(){
                     <label htmlFor="username" className="mt-6   ">Username</label>
                     <input
                         ref={(el) => (refs.current.username = el)}
-                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
+                        className={`p-2 mt-1.5 rounded-lg outline-0 border focus:border ${
+                            fieldErrors.username ? "border-red-400 bg-red-50 focus:border-red-500" : "border-gray-200 focus:border-gray-700"
+                        }`}
                         type="text" 
                         name="username" 
                         id="username"
@@ -107,6 +105,7 @@ export default function Signup(){
                         autoComplete="new-name"                
                         required
                     />
+                    {fieldErrors.username && <p className="mt-2 text-sm text-red-500">{fieldErrors.username}</p>}
                 </div>
                 <div
                     className="flex flex-col"
@@ -114,7 +113,9 @@ export default function Signup(){
                     <label htmlFor="displayname" className="mt-6">Display Name</label>
                     <input 
                         ref={(el) => (refs.current.displayname = el)}
-                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
+                        className={`p-2 mt-1.5 rounded-lg outline-0 border focus:border ${
+                            fieldErrors.displayname ? "border-red-400 bg-red-50 focus:border-red-500" : "border-gray-200 focus:border-gray-700"
+                        }`}
                         type="text" 
                         name="displayname" 
                         id="displayname"
@@ -125,6 +126,7 @@ export default function Signup(){
                         autoComplete="new-name"
                         required
                     />
+                    {fieldErrors.displayname && <p className="mt-2 text-sm text-red-500">{fieldErrors.displayname}</p>}
                 </div>
                 <div
                     className="flex flex-col"
@@ -132,7 +134,9 @@ export default function Signup(){
                     <label htmlFor="email" className="mt-6">Email</label>
                     <input 
                         ref={(el) => (refs.current.email = el)}
-                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
+                        className={`p-2 mt-1.5 rounded-lg outline-0 border focus:border ${
+                            fieldErrors.email ? "border-red-400 bg-red-50 focus:border-red-500" : "border-gray-200 focus:border-gray-700"
+                        }`}
                         type="email" 
                         name="email" 
                         id="email"
@@ -142,6 +146,8 @@ export default function Signup(){
                         disabled={isPending}
                         autoComplete="new-email"
                     />
+                    {fieldErrors.email && <p className="mt-2 text-sm text-red-500">{fieldErrors.email}</p>}
+                    {!fieldErrors.email && error && <p className="mt-2 text-sm text-red-500">{error}</p>}
                 </div>
                 <div
                     className="flex flex-col"
@@ -149,7 +155,9 @@ export default function Signup(){
                     <label htmlFor="password" className="mt-6">Password</label>
                     <input
                         ref={(el) => refs.current.password = el}
-                        className="p-2 mt-1.5 rounded-lg outline-0 border border-gray-200 focus:border focus:border-gray-700"
+                        className={`p-2 mt-1.5 rounded-lg outline-0 border focus:border ${
+                            fieldErrors.password ? "border-red-400 bg-red-50 focus:border-red-500" : "border-gray-200 focus:border-gray-700"
+                        }`}
                         type="password" 
                         name="password" 
                         id="password"
@@ -160,6 +168,7 @@ export default function Signup(){
                         autoComplete="off"
                         required
                     />
+                    {fieldErrors.password && <p className="mt-2 text-sm text-red-500">{fieldErrors.password}</p>}
                 </div>
                 <div>
                     <button 
