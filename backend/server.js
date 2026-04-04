@@ -4,7 +4,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose"; 
 import routes from "./routes/auth.routes.js";
-import userRoute from "./routes/userRoute.js"; 
+import userRoute from "./routes/userRoute.js";
+import dns from "dns";
+
+dns.setServers(["1.1.1.1"], ["8.8.8.8"]);
 
 dotenv.config();
 
