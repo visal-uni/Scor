@@ -7,7 +7,7 @@ import routes from "./routes/auth.routes.js";
 import userRoute from "./routes/userRoute.js";
 import dns from "dns";
 
-dns.setServers(["1.1.1.1"], ["8.8.8.8"]);
+dns.setServers(["1.1.1.1"], ["8.8.8.8"]);  //Set server for local machine
 
 dotenv.config();
 
